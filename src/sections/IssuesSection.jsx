@@ -1,4 +1,7 @@
-function IssuesSection() {
+import React from 'react';
+import { ProblemCard } from '../components';
+
+export default function IssuesSection() {
   const issues = [
     {
       problem: 'Broadband Not Working',
@@ -25,7 +28,7 @@ function IssuesSection() {
   return (
     <section className="py-20 px-6 bg-gray-900">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+        <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-white">
           Common Issues & Our Solutions
         </h2>
 

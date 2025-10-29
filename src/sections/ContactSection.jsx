@@ -1,4 +1,8 @@
-function ContactSection() {
+import React from 'react';
+import { Mail, Phone, MapPin } from 'lucide-react';
+import { ContactCard } from '../components';
+
+export default function ContactSection() {
   const contacts = [
     { icon: <Mail className="w-8 h-8" />, label: 'Email', value: 'support@networksupport.com' },
     { icon: <Phone className="w-8 h-8" />, label: 'Phone', value: '+1 (555) 123-4567' },
@@ -8,7 +12,7 @@ function ContactSection() {
   return (
     <section className="py-20 px-6 bg-gradient-to-b from-gray-800 to-gray-900 border-t border-gray-700">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">Get In Touch</h2>
+        <h2 className="text-4xl md:text-5xl font-bold text-center text-white mb-4">Get In Touch</h2>
         <p className="text-center text-gray-400 mb-16">
           Have questions? We'd love to hear from you. Contact us anytime.
         </p>

@@ -1,6 +1,71 @@
-function SignupPage({ setCurrentPage }) {
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Wifi, Zap, Shield, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { registerUser } from '../services/authService';
+
+export default function SignupPage() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    contactNumber: '',
+    location: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setError('');
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await registerUser(formData);
+      setSuccess('Account created successfully! Redirecting to login...');
+      setFormData({
+        fullName: '',
+        email: '',
+        contactNumber: '',
+        location: '',
+        password: '',
+        confirmPassword: '',
+      });
+      setTimeout(() => {
+        navigate('/login', { replace: true });
+        setSuccess('');
+      }, 2000);
+    } catch (err) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen pt-20 pb-20 px-6 flex items-center justify-center">
@@ -65,19 +130,39 @@ function SignupPage({ setCurrentPage }) {
               <p className="text-gray-400">Get started with NetworkSupport today</p>
             </div>
 
-            <div className="space-y-4">
+            {error && (
+              <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-red-400" />
+                <span className="text-red-400 text-sm">{error}</span>
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <span className="text-green-400 text-sm">{success}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSignup} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-2">Full Name</label>
+                <label className="block text-sm font-semibold mb-2">Full Name *</label>
                 <input
                   type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
                   placeholder="John Doe"
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 transition"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">Email</label>
+                <label className="block text-sm font-semibold mb-2">Email *</label>
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
                   placeholder="john@example.com"
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 transition"
                 />
@@ -86,6 +171,9 @@ function SignupPage({ setCurrentPage }) {
                 <label className="block text-sm font-semibold mb-2">Contact Number (Optional)</label>
                 <input
                   type="tel"
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  onChange={handleInputChange}
                   placeholder="1234567890"
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 transition"
                 />
@@ -94,19 +182,26 @@ function SignupPage({ setCurrentPage }) {
                 <label className="block text-sm font-semibold mb-2">Location (Optional)</label>
                 <input
                   type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
                   placeholder="New York"
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 transition"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">Password</label>
+                <label className="block text-sm font-semibold mb-2">Password *</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
                     placeholder="••••••••"
                     className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 transition pr-10"
                   />
                   <button
+                    type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 text-gray-400 hover:text-cyan-400 transition"
                   >
@@ -115,14 +210,18 @@ function SignupPage({ setCurrentPage }) {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">Confirm Password</label>
+                <label className="block text-sm font-semibold mb-2">Confirm Password *</label>
                 <div className="relative">
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
                     placeholder="••••••••"
                     className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 transition pr-10"
                   />
                   <button
+                    type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-3 text-gray-400 hover:text-cyan-400 transition"
                   >
@@ -131,10 +230,14 @@ function SignupPage({ setCurrentPage }) {
                 </div>
               </div>
 
-              <button className="w-full bg-gradient-to-r from-cyan-400 to-blue-400 text-gray-900 font-semibold py-3 rounded-lg hover:shadow-lg hover:shadow-cyan-400/50 transition active:scale-95 mt-2">
-                Sign Up
+              <button 
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-cyan-400 to-blue-400 text-gray-900 font-semibold py-3 rounded-lg hover:shadow-lg hover:shadow-cyan-400/50 transition active:scale-95 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Creating account...' : 'Sign Up'}
               </button>
-            </div>
+            </form>
 
             <div className="mt-6">
               <div className="relative mb-6">
@@ -171,43 +274,16 @@ function SignupPage({ setCurrentPage }) {
 
             <p className="text-center text-gray-400 mt-6">
               Already have an account?{' '}
-              <button
-                onClick={() => setCurrentPage('login')}
+              <Link
+                to="/login"
                 className="text-cyan-400 hover:text-cyan-300 font-semibold transition"
               >
                 Login
-              </button>
+              </Link>
             </p>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-// ============= MAIN APP =============
-
-export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <HomePage setCurrentPage={setCurrentPage} />;
-      case 'login':
-        return <LoginPage setCurrentPage={setCurrentPage} />;
-      case 'signup':
-        return <SignupPage setCurrentPage={setCurrentPage} />;
-      default:
-        return <HomePage setCurrentPage={setCurrentPage} />;
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      {renderPage()}
-      <Footer />
     </div>
   );
 }

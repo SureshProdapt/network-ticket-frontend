@@ -1,5 +1,80 @@
-function LoginPage({ setCurrentPage }) {
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Wifi, Zap, Shield, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { loginUser, isUserLoggedIn } from '../services/authService';
+
+export default function LoginPage() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password: '',
+  });
+
+  // Check if user is already logged in on component mount
+  useEffect(() => {
+    const checkAuth = () => {
+      if (isUserLoggedIn()) {
+        navigate('/user/dashboard', { replace: true });
+      } else {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setCredentials(prev => ({ ...prev, [name]: value }));
+    setError('');
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    
+    if (!credentials.email || !credentials.password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
+    setIsAuthenticating(true);
+    try {
+      const response = await loginUser(credentials);
+      
+      if (!response.token) {
+        setError('Invalid credentials. Please try again.');
+        setIsAuthenticating(false);
+        return;
+      }
+
+      setSuccess('Login successful! Redirecting to dashboard...');
+      setCredentials({ email: '', password: '' });
+      setError('');
+      
+      // Use setTimeout to ensure state updates complete before redirect
+      setTimeout(() => {
+        navigate('/user/dashboard', { replace: true });
+      }, 1000);
+    } catch (err) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+      setIsAuthenticating(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-20 pb-20 px-6 flex items-center justify-center">
@@ -69,6 +144,9 @@ function LoginPage({ setCurrentPage }) {
                 <label className="block text-sm font-semibold mb-2">Email</label>
                 <input
                   type="email"
+                  name="email"
+                  value={credentials.email}
+                  onChange={handleInputChange}
                   placeholder="john@example.com"
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 transition"
                 />
@@ -83,10 +161,14 @@ function LoginPage({ setCurrentPage }) {
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={credentials.password}
+                    onChange={handleInputChange}
                     placeholder="••••••••"
                     className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 transition pr-10"
                   />
                   <button
+                    type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 text-gray-400 hover:text-cyan-400 transition"
                   >
@@ -95,13 +177,31 @@ function LoginPage({ setCurrentPage }) {
                 </div>
               </div>
 
+              {error && (
+                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-400" />
+                  <span className="text-red-400 text-sm">{error}</span>
+                </div>
+              )}
+
+              {success && (
+                <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <span className="text-green-400 text-sm">{success}</span>
+                </div>
+              )}
+
               <label className="flex items-center gap-3 cursor-pointer group">
                 <input type="checkbox" className="w-5 h-5 rounded bg-gray-700 border-gray-600 accent-cyan-400" />
                 <span className="text-sm text-gray-400 group-hover:text-gray-300 transition">Keep me logged in</span>
               </label>
 
-              <button className="w-full bg-gradient-to-r from-cyan-400 to-blue-400 text-gray-900 font-semibold py-3 rounded-lg hover:shadow-lg hover:shadow-cyan-400/50 transition active:scale-95">
-                Sign In
+              <button 
+                onClick={handleLogin}
+                disabled={isAuthenticating}
+                className="w-full bg-gradient-to-r from-cyan-400 to-blue-400 text-gray-900 font-semibold py-3 rounded-lg hover:shadow-lg hover:shadow-cyan-400/50 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isAuthenticating ? 'Signing in...' : 'Sign In'}
               </button>
             </div>
 

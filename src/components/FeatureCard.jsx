@@ -1,4 +1,6 @@
-function FeatureCard({ icon, title, desc }) {
+import React from 'react';
+
+export default function FeatureCard({ icon, title, desc }) {
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30 transition transform hover:translate-y-[-4px] group cursor-pointer relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/5 to-cyan-400/0 opacity-0 group-hover:opacity-100 transition duration-500" />
