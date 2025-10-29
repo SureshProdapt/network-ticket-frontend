@@ -8,7 +8,7 @@ export default function ContactCard({ icon, label, value }) {
         {icon}
       </div>
       <p className="text-gray-400 text-sm mb-2">{label}</p>
-      <p className="font-semibold text-lg group-hover:text-cyan-400 transition">{value}</p>
+      <p className="font-semibold text-lg text-white group-hover:text-cyan-400 transition">{value}</p>
     </div>
   );
 }

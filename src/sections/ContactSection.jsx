@@ -24,7 +24,7 @@ export default function ContactSection() {
         </div>
 
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-8 max-w-2xl mx-auto hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30 transition">
-          <h3 className="text-2xl font-bold mb-6">Send us a Message</h3>
+          <h3 className="text-2xl font-bold mb-6 text-white ">Send us a Message</h3>
           <div className="space-y-4">
             <input
               type="text"

@@ -7,7 +7,7 @@ export default function FeatureCard({ icon, title, desc }) {
       <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center mb-4 shadow-lg shadow-cyan-400/50 group-hover:shadow-xl group-hover:shadow-cyan-400/70 transition">
         {icon}
       </div>
-      <h3 className="text-xl font-bold mb-3 group-hover:text-cyan-400 transition">{title}</h3>
+      <h3 className="text-xl font-bold mb-3 text-white group-hover:text-cyan-400 transition">{title}</h3>
       <p className="text-gray-400 group-hover:text-gray-300 transition">{desc}</p>
     </div>
   );
