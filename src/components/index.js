@@ -4,3 +4,4 @@ export { default as FeatureCard } from './FeatureCard';
 export { default as ProblemCard } from './ProblemCard';
 export { default as ContactCard } from './ContactCard';
 export {default as Button} from './Button'
+export {default as CreateTicketModal} from './CreateTicketModal'

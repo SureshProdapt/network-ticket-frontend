@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wifi, Ticket, Clock, CheckCircle, Plus, LogOut, User, Menu, X } from 'lucide-react';
 import { logoutUser, getStoredUser } from '../services/authService';
+import CreateTicketModal from '../components/CreateTicketModal';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -27,6 +28,11 @@ export default function DashboardPage() {
   const handleLogout = () => {
     logoutUser();
     navigate('/', { replace: true });
+  };
+
+  const handleTicketCreated = () => {
+    // Refresh stats or tickets here if needed
+    console.log('Ticket created successfully');
   };
 
   return (
@@ -173,6 +179,13 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+
+      {/* Create Ticket Modal */}
+      <CreateTicketModal
+        isOpen={isCreateTicketOpen}
+        onClose={() => setIsCreateTicketOpen(false)}
+        onSuccess={handleTicketCreated}
+      />
     </div>
   );
 }
