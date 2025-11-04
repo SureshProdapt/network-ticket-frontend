@@ -5,7 +5,7 @@ export const registerUser = async (userData) => {
     const response = await api.post('/users/register', {
       name: userData.fullName,
       email: userData.email,
-      role: 'CUSTOMER', // Default role
+      role: 'CUSTOMER',
       contactNumber: userData.contactNumber || '',
       location: userData.location || '',
       passwordHash: userData.password,
@@ -23,19 +23,19 @@ export const loginUser = async (credentials) => {
       password: credentials.password,
     });
     
-    // Store JWT token if provided
+    // Store JWT token, user data, and role
     if (response.data.token) {
       localStorage.setItem('authToken', response.data.token);
       
-      // Store user data if available
+      // Store user with role
       if (response.data.user) {
         localStorage.setItem('user', JSON.stringify(response.data.user));
-      } else {
-        // If no user object returned, create minimal user object
-        localStorage.setItem('user', JSON.stringify({
-          email: credentials.email,
-          name: credentials.email.split('@')[0] // Use email prefix as name if not provided
-        }));
+        localStorage.setItem('userRole', response.data.user.role);
+      }
+      
+      // Store dashboard data if available
+      if (response.data.dashboardData) {
+        localStorage.setItem('dashboardData', JSON.stringify(response.data.dashboardData));
       }
       
       localStorage.setItem('loginTime', new Date().getTime().toString());
@@ -59,13 +59,30 @@ export const getStoredToken = () => {
 export const getStoredUser = () => {
   try {
     const user = localStorage.getItem('user');
-    // Return null if user doesn't exist, don't try to parse undefined
-    if (!user) {
-      return null;
-    }
+    if (!user) return null;
     return JSON.parse(user);
   } catch (error) {
     console.error('Error getting user:', error);
+    return null;
+  }
+};
+
+export const getUserRole = () => {
+  try {
+    return localStorage.getItem('userRole');
+  } catch (error) {
+    console.error('Error getting role:', error);
+    return null;
+  }
+};
+
+export const getDashboardData = () => {
+  try {
+    const data = localStorage.getItem('dashboardData');
+    if (!data) return null;
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error getting dashboard data:', error);
     return null;
   }
 };
@@ -84,6 +101,8 @@ export const logoutUser = () => {
   try {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('dashboardData');
     localStorage.removeItem('loginTime');
   } catch (error) {
     console.error('Error during logout:', error);
@@ -92,12 +111,8 @@ export const logoutUser = () => {
 
 export const getUserProfile = async (userId) => {
   try {
-    const response = await api.get(`/users/${userId}`, {
-      headers: {
-        'Authorization': `Bearer ${getStoredToken()}`,
-      },
-    });
-    return response.data;
+    const response = await api.get(`/users/${userId}`);
+    return response.data || response;
   } catch (error) {
     throw error.response?.data || error.message;
   }

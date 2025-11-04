@@ -2,7 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Navigation, Footer } from './components';
 import ProtectedRoute from './components/ProtectedRoute';
-import { HomePage, LoginPage, SignupPage, DashboardPage } from './pages';
+import RoleBasedRoute from './components/RoleBasedRoute';
+import AgentLayout from './layouts/AgentLayout';
+import { HomePage, LoginPage, SignupPage, DashboardPage, AgentDashboard } from './pages';
+import CreateCustomerTicket from './pages/CreateCustomerTicket';
 import { isUserLoggedIn } from './services/authService';
 
 export default function App() {
@@ -26,7 +29,7 @@ export default function App() {
           path="/signup"
           element={
             isUserLoggedIn() ? (
-              <Navigate to="/user/dashboard" replace />
+              <Navigate to="/customer/dashboard" replace />
             ) : (
               <>
                 <Navigation />
@@ -42,7 +45,7 @@ export default function App() {
           path="/login"
           element={
             isUserLoggedIn() ? (
-              <Navigate to="/user/dashboard" replace />
+              <Navigate to="/customer/dashboard" replace />
             ) : (
               <>
                 <Navigation />
@@ -53,12 +56,48 @@ export default function App() {
           }
         />
 
-        {/* Protected Dashboard Route */}
+        {/* Customer Route */}
         <Route
-          path="/user/dashboard"
+          path="/customer/dashboard"
+          element={
+            <RoleBasedRoute allowedRoles={['CUSTOMER']}>
+              <DashboardPage />
+            </RoleBasedRoute>
+          }
+        />
+
+        {/* Agent Routes - Nested with Layout */}
+        <Route
+          path="/agent"
+          element={
+            <RoleBasedRoute allowedRoles={['AGENT']}>
+              <AgentLayout />
+            </RoleBasedRoute>
+          }
+        >
+          <Route path="dashboard" element={<AgentDashboard />} />
+          <Route path="create-ticket" element={<CreateCustomerTicket />} />
+        </Route>
+
+        {/* Engineer Route */}
+        <Route
+          path="/engineer/dashboard"
+          element={
+            <RoleBasedRoute allowedRoles={['ENGINEER']}>
+              {/* <EngineerDashboard /> - Create this next */}
+            </RoleBasedRoute>
+          }
+        />
+
+        {/* Redirect old route */}
+        <Route path="/user/dashboard" element={<Navigate to="/customer/dashboard" replace />} />
+
+        {/* ProtectedRoute example if needed */}
+        <Route
+          path="/protected"
           element={
             <ProtectedRoute>
-              <DashboardPage />
+              <div>Protected Content</div>
             </ProtectedRoute>
           }
         />

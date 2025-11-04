@@ -5,3 +5,7 @@ export { default as ProblemCard } from './ProblemCard';
 export { default as ContactCard } from './ContactCard';
 export {default as Button} from './Button'
 export {default as CreateTicketModal} from './CreateTicketModal'
+export {default as RoleBasedRoute} from './RoleBasedRoute'
+export {default as StatCard} from './StatCard'
+export {default as TicketDetailsModal} from './TicketDetailsModal'
+export {default as TicketTable} from './TicketsTable'

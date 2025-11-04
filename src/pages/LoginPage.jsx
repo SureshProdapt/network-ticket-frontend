@@ -26,7 +26,7 @@ export default function LoginPage() {
   useEffect(() => {
     const checkAuth = () => {
       if (isUserLoggedIn()) {
-        navigate('/user/dashboard', { replace: true });
+        navigate('/customer/dashboard', { replace: true });
       } else {
         setLoading(false);
       }
@@ -52,18 +52,27 @@ export default function LoginPage() {
     try {
       const response = await loginUser(credentials);
 
-      if (!response || !response.token) {
+      if (!response.token) {
         setError('Invalid credentials. Please try again.');
         setIsAuthenticating(false);
         return;
       }
 
-      setSuccess('Login successful Redirecting to dashboard');
+      setSuccess('Login successful! Redirecting...');
       setCredentials({ email: '', password: '' });
       setError('');
 
       setTimeout(() => {
-        navigate('/user/dashboard', { replace: true });
+        const userRole = response.user?.role;
+        const dashboardRoutes = {
+          CUSTOMER: '/customer/dashboard',
+          AGENT: '/agent/dashboard',
+          ENGINEER: '/engineer/dashboard',
+        };
+
+        const redirectPath = dashboardRoutes[userRole] || '/customer/dashboard';
+        navigate(redirectPath, { replace: true });
+        setSuccess('');
       }, 1000);
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
@@ -84,7 +93,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex font-sans bg-gray-900 overflow-hidden">
-      {/* Left half with background image fixed on large screens */}
       <div className="hidden lg:flex w-1/2 h-screen relative">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -103,7 +111,7 @@ export default function LoginPage() {
             </div>
             <h2 className="text-4xl font-bold leading-tight mb-3">Welcome Back</h2>
             <p className="text-lg text-gray-300 mb-8">
-              Continue managing your network issues with ease and get real-time support from our expert team.
+              Continue managing your network issues with ease and get real time support from our expert team.
             </p>
 
             <div className="space-y-5 max-w-sm">
@@ -141,7 +149,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right half with internal scroll */}
       <div className="w-full lg:w-1/2 h-screen overflow-y-auto p-8">
         <div className="w-full max-w-md mx-auto">
           <div className="text-center mb-6">
